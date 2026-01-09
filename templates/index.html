@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <title>Casinoeuil (CLIMAX EDITION)</title> <!-- Titre de la page -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}"> <!-- Redirection vers la page css-->
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">
+        <img src="https://github.com/user-attachments/assets/d29729d4-da3d-4b22-a951-cbc7fc0d02ca" width="30%" height="30%"/>
+    </div>
+    <div class="header-right">
+        <!-- Affichage de l'argent -->
+        <span class="money-display" id="moneyDisplay">{{ money }} $</span>
+        <span class="income-display" id="incomeDisplay">+0 $/s</span>
+        
+        <!-- Bouton Profil -->
+        <a href="/profile" class="reset-btn">👤 Profil</a>
+        
+        <!-- Bouton Déconnexion -->
+        <a href="/logout" class="reset-btn">🚪 Déconnexion</a>
+    </div>
+</div>
+
+{% if current_user.is_authenticated %}
+<div class="container">
+    <div class="welcome-message">
+        Bienvenue, <strong>{{ current_user.username }}</strong> ! 🎰
+    </div>
+</div>
+{% endif %}
+
+    <div class="container">
+        <!-- Menu principal -->
+        <div id="menu" class="game-screen active">
+            <h2 style="text-align: center; font-size: 32px; margin-bottom: 40px;">Choose Your Game</h2>
+            <div class="menu-grid">
+                <div class="game-card" onclick="startGame('clicker')">
+                    <div class="game-logo">
+                        <img src="https://github.com/user-attachments/assets/e6e8a0cb-283e-488f-895b-239481e9db26" alt="Money Clicker"/>  <!-- Lien images illustrer jeux -->
+                    </div>
+                    <div class="game-title">Money Clicker</div>
+                    <div class="game-desc">Click to earn money passively</div>
+                </div>
+                <div class="game-card" onclick="startGame('blackjack')">
+                    <div class="game-logo">
+                        <img src="https://github.com/user-attachments/assets/7b155565-cee2-4cbb-bff8-fc6804ed6395" alt="BlackJack"/>
+                    </div>
+                    <div class="game-title">BlackJack</div>
+                    <div class="game-desc">Beat the dealer without going over 21</div>
+                </div>
+                <div class="game-card" onclick="startGame('roulette')">
+                    <div class="game-logo">
+                        <img src="https://github.com/user-attachments/assets/5e8038c3-76ec-4d77-b6f3-1c1eec3bd880" alt="Roulette"/>
+                    </div>
+                    <div class="game-title">Roulette</div>
+                    <div class="game-desc">Bet on your favorite color or number</div>
+                </div>
+                <div class="game-card" onclick="startGame('minebomb')">
+                    <div class="game-logo">
+                        <img src="https://github.com/user-attachments/assets/e5c6692e-15e3-4d4e-8a13-759c310b46f6" alt="MineBomb"/>
+                    </div>
+                    <div class="game-title">MineBomb</div>
+                    <div class="game-desc">Avoid bombs and multiply your winnings</div>
+                </div>
+                <div class="game-card" onclick="startGame('slots')">
+                    <div class="game-logo">
+                        <img src="https://github.com/user-attachments/assets/5880931b-1faf-4b58-b374-122925c2d932" alt="Slots"/>
+                    </div>
+                    <div class="game-title">Slot Machine</div>
+                    <div class="game-desc">Match 2 or 3 identical symbols!</div>
+                </div>
+            </div>
+
+            <div class="stats">
+                <h3>Global Statistics (Shared between all players)</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Games Played</div>
+                        <div class="stat-value" id="totalGames">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Wins</div>
+                        <div class="stat-value" id="totalWins">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Losses</div>
+                        <div class="stat-value" id="totalLosses">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Win Rate</div>
+                        <div class="stat-value" id="winRate">0%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Wagered</div>
+                        <div class="stat-value" id="totalWagered">0 $</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Won</div>
+                        <div class="stat-value" id="totalWinnings">0 $</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Biggest Win</div>
+                        <div class="stat-value" id="biggestWin">0 $</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Biggest Loss</div>
+                        <div class="stat-value" id="biggestLoss">0 $</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats" style="margin-top: 24px;">
+                <h3>Statistics by Game</h3>
+                
+                <div style="margin-bottom: 24px;">
+                    <h4 style="color: #cbd5e1; margin-bottom: 12px;">BlackJack</h4>
+                    <div class="stat-row">
+                        <span>Games:</span>
+                        <span id="bjGames">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Wins:</span>
+                        <span id="bjWins">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Win Rate:</span>
+                        <span id="bjWinRate">0%</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Profit/Loss:</span>
+                        <span id="bjProfit">0 $</span>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 24px;">
+                    <h4 style="color: #cbd5e1; margin-bottom: 12px;">Roulette</h4>
+                    <div class="stat-row">
+                        <span>Games:</span>
+                        <span id="rouletteGames">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Wins:</span>
+                        <span id="rouletteWins">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Win Rate:</span>
+                        <span id="rouletteWinRate">0%</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Profit/Loss:</span>
+                        <span id="rouletteProfit">0 $</span>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 24px;">
+                    <h4 style="color: #cbd5e1; margin-bottom: 12px;">MineBomb</h4>
+                    <div class="stat-row">
+                        <span>Games:</span>
+                        <span id="mbGames">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Wins:</span>
+                        <span id="mbWins">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Win Rate:</span>
+                        <span id="mbWinRate">0%</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Profit/Loss:</span>
+                        <span id="mbProfit">0 $</span>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 24px;">
+                    <h4 style="color: #cbd5e1; margin-bottom: 12px;">Slots</h4>
+                    <div class="stat-row">
+                        <span>Games:</span>
+                        <span id="slotsGames">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Wins:</span>
+                        <span id="slotsWins">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Win Rate:</span>
+                        <span id="slotsWinRate">0%</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Profit/Loss:</span>
+                        <span id="slotsProfit">0 $</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Money Clicker -->
+        <div id="clicker" class="game-screen">
+            <button class="back-btn" onclick="backToMenu()">← Back</button>
+            <h2 style="text-align: center; font-size: 32px; margin-bottom: 30px;">Money Clicker</h2>
+            
+            <div class="clicker-container">
+                <div class="click-area">
+                    <button class="click-button" id="clickButton" onclick="doClick()">
+                        <div class="click-value">+<span id="clickValue">1</span> $</div>
+                        <div class="click-icon">
+                            <img src="https://raw.githubusercontent.com/CLIMAXGN/Casinoeuil/refs/heads/main/L622X63BQF3BVIFK3NZVM6XDLQ-removebg-preview.png"
+                                alt="Money"
+                                style="width: 250px; height: auto;">
+                            </div>
+                        <div class="click-text">CLICK ME!</div>
+                    </button>
+                    <div id="floatingNumbers"></div>
+                </div>
+
+                <div class="upgrades-section">
+                    <h3>Upgrades</h3>
+                    
+                    <div class="upgrade-card" id="upgrade1">
+                        <div class="upgrade-header">
+                            <span class="upgrade-name"> Archibogue Power</span>
+                            <span class="upgrade-level">Level: <span id="clickLevel">1</span></span>
+                        </div>
+                        <div class="upgrade-desc">+1 $ per click</div>
+                        <div class="upgrade-footer">
+                            <span class="upgrade-cost">Cost: <span id="clickCost">10</span> $</span>
+                            <button class="upgrade-btn" onclick="buyUpgrade('click')">Buy</button>
+                        </div>
+                    </div>
+
+                    <div class="upgrade-card" id="upgrade2">
+                        <div class="upgrade-header">
+                            <span class="upgrade-name">'Pataphysique Autoclicker</span>
+                            <span class="upgrade-level">Level: <span id="autoLevel">0</span></span>
+                        </div>
+                        <div class="upgrade-desc">+1 $/s passive income</div>
+                        <div class="upgrade-footer">
+                            <span class="upgrade-cost">Cost: <span id="autoCost">50</span> $</span>
+                            <button class="upgrade-btn" onclick="buyUpgrade('auto')">Buy</button>
+                        </div>
+                    </div>
+
+                     <div class="upgrade-card" id="upgrade3">
+                        <div class="upgrade-header">
+                            <span class="upgrade-name">₿itcoin Factory</span>
+                            <span class="upgrade-level">Level: <span id="factoryLevel">0</span></span>
+                        </div>
+                        <div class="upgrade-desc">+5 $/s passive income</div>
+                        <div class="upgrade-footer">
+                            <span class="upgrade-cost">Cost: <span id="factoryCost">200</span> $</span>
+                            <button class="upgrade-btn" onclick="buyUpgrade('factory')">Buy</button>
+                        </div>
+                    </div>
+
+                    <div class="upgrade-card" id="upgrade4">
+                        <div class="upgrade-header">
+                            <span class="upgrade-name">🎨 NFT Investment</span>
+                            <span class="upgrade-level">Level: <span id="bankLevel">0</span></span>
+                        </div>
+                        <div class="upgrade-desc">+20 $/s passive income</div>
+                        <div class="upgrade-footer">
+                            <span class="upgrade-cost">Cost: <span id="bankCost">1000</span> $</span>
+                            <button class="upgrade-btn" onclick="buyUpgrade('bank')">Buy</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Premier jeu, le blackjack. -->
+        <div id="blackjack" class="game-screen">
+            <button class="back-btn" onclick="backToMenu()">← Back</button>
+            <h2 style="text-align: center; font-size: 32px; margin-bottom: 20px;">BlackJack</h2>
+            <div class="game-info" id="deckInfo" style="text-align: center; color: #94a3b8; font-size: 13px; margin-bottom: 20px;">
+                Number of decks will be revealed at game start
+            </div>
+            
+            <div id="bjBetting">
+                <div class="input-group" style="text-align: center;">
+                    <label>Bet Amount:</label>
+                    <input type="number" id="bjBet" min="10" max="1000" value="50">
+                    <br><br>
+                    <button class="btn" onclick="startBlackjack()">Play</button>
+                </div>
+            </div>
+
+            <div id="bjGame" style="display: none;">
+                <div class="blackjack-table">
+                    <div class="hand">
+                        <div class="hand-title">Dealer - <span id="dealerTotal">?</span></div>
+                        <div class="cards" id="dealerCards"></div>
+                    </div>
+                    <div class="hand">
+                        <div class="hand-title">You - <span id="playerTotal">0</span></div>
+                        <div class="cards" id="playerCards"></div>
+                    </div>
+                </div>
+                <div style="text-align: center;">
+                    <button class="btn" id="hitBtn" onclick="hit()">Hit</button>
+                    <button class="btn" id="standBtn" onclick="stand()">Stand</button>
+                </div>
+                <div id="bjMessage"></div>
+            </div>
+        </div>
+
+        <!-- Deuxième jeu, la roulette. -->
+        <div id="roulette" class="game-screen">
+            <button class="back-btn" onclick="backToMenu()">← Back</button>
+            <h2 style="text-align: center; font-size: 32px; margin-bottom: 30px;">Roulette</h2>
+            
+            <div class="roulette-wheel" id="rouletteWheel">
+                <div class="roulette-center" id="rouletteResult">?</div>
+            </div>
+
+            <div id="rouletteBetting">
+                <div style="text-align: center;">
+                    <div class="input-group">
+                        <label>Game Mode:</label>
+                        <select id="rouletteMode" onchange="updateRouletteMode()">
+                            <option value="color">Color (x2)</option>
+                            <option value="number">Number (x35)</option>
+                        </select>
+                    </div>
+
+                    <div id="colorMode">
+                        <div class="color-buttons">
+                            <button class="color-btn red" onclick="selectColor('Red')">RED</button>
+                            <button class="color-btn black" onclick="selectColor('Black')">BLACK</button>
+                        </div>
+                    </div>
+
+                    <div id="numberMode" style="display: none;">
+                        <div class="input-group">
+                            <label>Choose a number (0-36):</label>
+                            <input type="number" id="rouletteNumber" min="0" max="36" value="0">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Bet Amount:</label>
+                        <input type="number" id="rouletteBet" min="10" max="1000" value="50">
+                    </div>
+
+                    <button class="btn" onclick="spinRoulette()">🎲 Spin</button>
+                </div>
+            </div>
+
+            <div id="rouletteMessage"></div>
+        </div>
+
+        <!-- Troisième jeu, le minebomb. -->
+        <div id="minebomb" class="game-screen">
+            <button class="back-btn" onclick="backToMenu()">← Back</button>
+            <h2 style="text-align: center; font-size: 32px; margin-bottom: 30px;">MineBomb</h2>
+            
+            <div id="mbBetting">
+                <div class="input-group" style="text-align: center;">
+                    <label>Bet Amount:</label>
+                    <input type="number" id="mbBet" min="10" max="1000" value="50">
+                    <br>
+                    <label>Number of Bombs (3-10):</label>
+                    <input type="number" id="mbBombs" min="3" max="10" value="5">
+                    <div class="bomb-info">
+                        More bombs = Higher multiplier per diamond! 💎 (Max: x67)
+                    </div>
+                    <br>
+                    <button class="btn" onclick="startMineBomb()">🎮 Play</button>
+                </div>
+            </div>
+
+            <div id="mbGame" style="display: none;">
+                <div class="mb-game-info">
+                    <div class="mb-info-item">
+                        <span class="mb-label">Bombs:</span>
+                        <span class="mb-value" id="bombCount">5</span>
+                    </div>
+                    <div class="mb-info-item">
+                        <span class="mb-label">Diamonds:</span>
+                        <span class="mb-value" id="diamondCount">0</span>
+                    </div>
+                </div>
+                <div class="multiplier-display">
+                    x<span id="multiplier">1.00</span>  <!-- multiplicateur -->
+                    <br>
+                    <span style="font-size: 20px;">Potential Win: <span id="potentialWin">0</span> $</span>  <!-- Gain potentiel qui évolue selon le multiplicateur, selon le nombre de diamants trouvés -->
+                </div>
+                <div class="minebomb-grid" id="mineGrid"></div>
+                <div style="text-align: center; margin-top: 24px;">
+                    <button class="btn cashout-btn" id="cashoutBtn" onclick="cashout()" disabled>CASHOUT</button> <!-- Cashout pour pouvoir retirer son argent avant de tomber sur une bombe -->
+                </div>
+                <div id="mbMessage"></div>
+            </div>
+        </div>
+
+        <!-- Slot Machine -->
+        <div id="slots" class="game-screen">
+            <button class="back-btn" onclick="backToMenu()">← Back</button>
+            <h2 style="text-align: center; font-size: 32px; margin-bottom: 30px;">Slot Machine</h2>
+            
+            <div class="slots-machine">
+                <div class="slots-display">
+                    <div class="slot-reel" id="reel1">🍎</div>
+                    <div class="slot-reel" id="reel2">🍋</div>
+                    <div class="slot-reel" id="reel3">🍊</div>
+                </div>
+                
+                <div class="slots-paytable">
+                    <h3>Payouts</h3>
+                    <div class="paytable-row">💎 💎 💎 = x100 MEGA JACKPOT!</div>
+                    <div class="paytable-row">7️⃣ 7️⃣ 7️⃣ = x50 JACKPOT!</div>
+                    <div class="paytable-row">🍎 🍎 🍎 = x20</div>
+                    <div class="paytable-row">🍋 🍋 🍋 = x15</div>
+                    <div class="paytable-row">🍊 🍊 🍊 = x12</div>
+                    <div class="paytable-row">🍇 🍇 🍇 = x10</div>
+                    <div class="paytable-row" style="border-top: 2px solid #3b82f6; margin-top: 8px; padding-top: 12px;">Any 2 identical = x2</div>
+                </div>
+
+                <div class="input-group" style="text-align: center; margin-top: 24px;">
+                    <label>Bet Amount:</label>
+                    <input type="number" id="slotsBet" min="10" max="1000" value="50"> <!-- Montant de la mise avec un minimum de 10$ et un maximum de 1000$ -->
+                    <br><br>
+                    <button class="btn" id="spinSlotsBtn" onclick="spinSlots()">🎰 SPIN</button>
+                </div>
+
+                <div id="slotsMessage"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script> <!-- Redirection vers le fichier script.js pour les interactions -->
+</body>
+</html>
